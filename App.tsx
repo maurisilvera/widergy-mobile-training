@@ -5,113 +5,132 @@
  * @format
  */
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
+import React, {useState} from 'react';
 import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
+  TouchableOpacity,
   StyleSheet,
   Text,
-  useColorScheme,
+  TextInput,
   View,
 } from 'react-native';
+import * as math from 'mathjs';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+function App(): JSX.Element {
+  const [expression, setExpression] = useState('');
+  const calcButtons = [
+    'C',
+    '(',
+    ')',
+    '←',
+    '7',
+    '8',
+    '9',
+    '+',
+    '4',
+    '5',
+    '6',
+    '-',
+    '1',
+    '2',
+    '3',
+    '*',
+    '0',
+    '.',
+    '/',
+    '=',
+  ];
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+  const validateExpression = (exp: string) => {
+    try {
+      math.evaluate(exp);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  };
 
-function Section({children, title}: SectionProps): JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+  const resolve = (exp: string) => {
+    if (validateExpression(exp)) {
+      if (exp.length > 0) {
+        setExpression(math.evaluate(exp).toString());
+      }
+    }
+  };
+
+  const onClickHandler = (value: string) => {
+    switch (value) {
+      case '←':
+        setExpression(expression.slice(0, -1));
+        break;
+      case 'C':
+        setExpression('');
+        break;
+      default:
+        setExpression(expression + value);
+    }
+  };
+
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
+    <View style={styles.calculator}>
+      <TextInput
+        value={expression}
+        style={styles.input}
+        editable={false}
+        onChangeText={setExpression}
+      />
+      <View style={styles.buttons}>
+        {calcButtons.map(button => (
+          <TouchableOpacity
+            style={styles.calcButton}
+            key={button}
+            onPress={() =>
+              button === '=' ? resolve(expression) : onClickHandler(button)
+            }>
+            <Text style={styles.calcButtonText}>{button}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
     </View>
   );
 }
 
-function App(): JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
-
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  calculator: {
+    height: '100%',
+    width: '100%',
+    alignItems: 'center',
+    backgroundColor: '#BFEAF5',
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+  buttons: {
+    flexWrap: 'wrap',
+    flexDirection: 'row',
+    width: '100%',
+    height: '83%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
+  input: {
+    backgroundColor: '#EAFDFC',
+    borderRadius: 15,
+    fontSize: 50,
+    margin: 10,
+    textAlign: 'right',
+    color: '#000',
+    height: '20%',
+    width: '95%',
   },
-  highlight: {
-    fontWeight: '700',
+  calcButton: {
+    backgroundColor: '#EAFDFC',
+    borderRadius: 15,
+    height: '16%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: 5,
+    width: '22%',
+  },
+  calcButtonText: {
+    fontSize: 25,
+    fontWeight: 'bold',
   },
 });
 
