@@ -12,10 +12,14 @@ import {
   Text,
   TextInput,
   View,
+  Button,
+  ScrollView,
+  SafeAreaView,
+  Pressable,
 } from 'react-native';
 import * as math from 'mathjs';
 
-function App(): JSX.Element {
+const Calculator = ({navigation}) => {
   const [expression, setExpression] = useState('');
   const calcButtons = [
     'C',
@@ -40,7 +44,7 @@ function App(): JSX.Element {
     '=',
   ];
 
-  const validateExpression = (exp: string) => {
+  const validateExpression = exp => {
     try {
       math.evaluate(exp);
       return true;
@@ -49,7 +53,7 @@ function App(): JSX.Element {
     }
   };
 
-  const resolve = (exp: string) => {
+  const resolve = exp => {
     if (validateExpression(exp)) {
       if (exp.length > 0) {
         setExpression(math.evaluate(exp).toString());
@@ -57,7 +61,7 @@ function App(): JSX.Element {
     }
   };
 
-  const onClickHandler = (value: string) => {
+  const onClickHandler = value => {
     switch (value) {
       case '←':
         setExpression(expression.slice(0, -1));
@@ -71,30 +75,40 @@ function App(): JSX.Element {
   };
 
   return (
-    <View style={styles.calculator}>
-      <TextInput
-        value={expression}
-        style={styles.input}
-        editable={false}
-        onChangeText={setExpression}
-      />
-      <View style={styles.buttons}>
-        {calcButtons.map(button => (
-          <TouchableOpacity
-            style={styles.calcButton}
-            key={button}
-            onPress={() =>
-              button === '=' ? resolve(expression) : onClickHandler(button)
-            }>
-            <Text style={styles.calcButtonText}>{button}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </View>
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.calculator}>
+        <TextInput
+          value={expression}
+          style={styles.input}
+          editable={false}
+          onChangeText={setExpression}
+        />
+        <View style={styles.buttons}>
+          {calcButtons.map(button => (
+            <TouchableOpacity
+              style={styles.calcButton}
+              key={button}
+              onPress={() =>
+                button === '=' ? resolve(expression) : onClickHandler(button)
+              }>
+              <Text style={styles.calcButtonText}>{button}</Text>
+            </TouchableOpacity>
+          ))}
+          <Pressable
+            style={styles.navigationButton}
+            onPress={() => navigation.navigate('history')}>
+            <Text style={styles.historyButtonText}>Historial</Text>
+          </Pressable>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   calculator: {
     height: '100%',
     width: '100%',
@@ -105,7 +119,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     flexDirection: 'row',
     width: '100%',
-    height: '83%',
+    height: '73%',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -132,6 +146,16 @@ const styles = StyleSheet.create({
     fontSize: 25,
     fontWeight: 'bold',
   },
+  navigationButton: {
+    backgroundColor: '#EAFDFC',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+  },
+  historyButtonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
 });
 
-export default App;
+export default Calculator;
